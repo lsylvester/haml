@@ -530,6 +530,9 @@ MESSAGE
     # Characters that need to be escaped to HTML entities from user input
     HTML_ESCAPE = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;', }
 
+    # Regex to escape HTML charachers
+    HTML_ESCAPE_REGEX = /[\"><&]/
+
     # Returns a copy of `text` with ampersands, angle brackets and quotes
     # escaped into HTML entities.
     #
@@ -540,28 +543,20 @@ MESSAGE
     # @param text [String] The string to sanitize
     # @return [String] The sanitized string
     def html_escape(text)
-      pattern = '[\"><&]'
-      regex = if RUBY_VERSION >= '1.9'
-        Regexp.new(pattern.force_encoding(text.encoding), Regexp::FIXEDENCODING)
-      else
-        Regexp.new(pattern)
-      end
-      text.to_s.gsub(regex) {|s| HTML_ESCAPE[s]}
+      text.to_s.gsub(HTML_ESCAPE_REGEX){|s| HTML_ESCAPE[s]}
     end
+
+    # Regex to escape HTML charachers once
+    HTML_ESCAPE_ONCE_REGEX = /[\"><]|&(?!(?:[a-zA-Z]+|(#\d+));)/
 
     # Escapes HTML entities in `text`, but without escaping an ampersand
     # that is already part of an escaped entity.
     #
     # @param text [String] The string to sanitize
     # @return [String] The sanitized string
+
     def escape_once(text)
-      pattern = '[\"><]|&(?!(?:[a-zA-Z]+|(#\d+));)'
-      regex = if RUBY_VERSION >= '1.9'
-        Regexp.new(pattern.force_encoding(text.encoding), Regexp::FIXEDENCODING)
-      else
-        Regexp.new(pattern)
-      end
-      text.to_s.gsub(regex) {|s| HTML_ESCAPE[s]}
+      text.to_s.gsub(HTML_ESCAPE_ONCE_REGEX){|s| HTML_ESCAPE[s]}
     end
 
     # Returns whether or not the current template is a Haml template.
